@@ -1,0 +1,17 @@
+name: analytics_demo
+description: Synthetic preview of shared analytics opportunities.
+publish_to: none
+version: 0.1.0
+environment:
+  sdk: '>=3.10.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  analytics_actions_flutter:
+    path: ../packages/analytics_actions_flutter
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+flutter:
+  uses-material-design: true

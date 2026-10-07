@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "shipglows.backend.v1",
+  "provider": "none",
+  "mode": "none",
+  "reason": "Synthetic local analytics presentation preview; no provider or protected data.",
+  "command": null,
+  "dependencies": [],
+  "readiness": null
+}
