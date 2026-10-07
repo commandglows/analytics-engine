@@ -24,7 +24,7 @@ def canonical_snapshot() -> tuple[dict[str, bytes], bytes]:
         files[path.relative_to(PACKAGE).as_posix()] = path.read_bytes()
     manifest = {
         "schemaVersion": "shipglows.analytics.vendor.v1",
-        "source": "shipglows-analytics-engine/packages/analytics_actions_flutter",
+        "source": "analytics-engine/packages/analytics_actions_flutter",
         "generated": True,
         "files": {name: hashlib.sha256(value).hexdigest() for name, value in sorted(files.items())},
     }

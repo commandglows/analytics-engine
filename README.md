@@ -1,4 +1,4 @@
-# ShipGlows Analytics Engine
+# Analytics Engine
 
 Shared Flutter analytics opportunities and agent CLI for ContentGlows and ShipGlows.
 The engine displays attributed measurements, hypotheses and proposed actions.
@@ -31,7 +31,7 @@ Only package manifests/options and Dart library sources are copied. Review and
 commit the generated snapshot with host changes so remote dependency resolution
 needs no sibling checkout or new credentials. A local development override may
 target the canonical sibling package without changing the committed dependency.
-Public repository: https://github.com/commandglows/shipglows-analytics-engine.
+Public repository: https://github.com/commandglows/analytics-engine.
 
 For isolated package checks, use the first host's configuration:
 

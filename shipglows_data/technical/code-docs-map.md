@@ -2,7 +2,7 @@
 artifact: code_docs_map
 metadata_schema_version: "1.0"
 artifact_version: "1.0.0"
-project: shipglows-analytics-engine
+project: analytics-engine
 created: "2026-10-06"
 updated: "2026-10-06"
 status: active
