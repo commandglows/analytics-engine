@@ -1,0 +1,14 @@
+version: 2
+# Mensuel + groupe : 1 PR par ecosysteme et par mois (les alertes securite restent immediates).
+updates:
+  - package-ecosystem: "pub"
+    directories:
+      - "/demo"
+      - "/packages/analytics_actions_flutter"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 5
+    groups:
+      pub_all:
+        patterns:
+          - "*"
