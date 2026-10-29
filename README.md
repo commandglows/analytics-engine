@@ -28,7 +28,8 @@ evidence of a decline.
 `GET /api/analytics/report`: visitors (new, returning), visits, attention time,
 read-through per page, authors, categories, page paths, pages that bring readers
 back, clicks and consented campaigns, plus the raw page views of every tracker
-(`traffic`) and the `reason` a report is not ready. Every figure is an anonymous aggregate
+(`traffic`) and the `reason`/`reasonCode` a report is not ready. Hosts pass
+`actionFor(reasonCode)` to put their own next step in the not-ready card. Every figure is an anonymous aggregate
 (groups under 10 visitors hidden, counts rounded to tens; CNIL rules in
 `contentglows/shipglows_data/technical/lab/audience-measurement-cnil.md`). The
 parser rejects unknown keys, non-finite or negative numbers, ratios above 1 and
