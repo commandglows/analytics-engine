@@ -21,13 +21,27 @@ Decline recommendations remain non-actionable until attributed measurements
 from the previous comparison window are included. Current clicks alone are not
 evidence of a decline.
 
+## Audience report (`shipglows.audience.v1`)
+
+`AudienceReport` / `AudienceReportView` show the first-party audience measured by
+`@shipglows/astro-engine/analytics` and served by ContentGlows
+`GET /api/analytics/report`: visitors (new, returning), visits, attention time,
+read-through per page, authors, categories, page paths, pages that bring readers
+back, clicks and consented campaigns. Every figure is an anonymous aggregate
+(groups under 10 visitors hidden, counts rounded to tens; CNIL rules in
+`contentglows/shipglows_data/technical/lab/audience-measurement-cnil.md`). The
+parser rejects unknown keys, non-finite or negative numbers, ratios above 1 and
+more than 200 rows per list. The tracker and this package share only that JSON
+contract, never code.
+
 ## Local use
 
 Both hosts consume a generated source snapshot at `app/vendor/analytics_actions_flutter`.
 This engine remains the canonical source; from its root, run
 `python tools/sync_consumers.py --host ../contentglows/app --host ../shipglows_app/app`
 and add `--check` to verify exact source and manifest hashes without writing.
-Only package manifests/options and Dart library sources are copied. Review and
+Only package manifests/options and Dart library sources are copied; files the
+ShipGlows dev tooling writes there (`ENVIRONMENT.md`, agent configs) are left alone. Review and
 commit the generated snapshot with host changes so remote dependency resolution
 needs no sibling checkout or new credentials. A local development override may
 target the canonical sibling package without changing the committed dependency.

@@ -12,6 +12,14 @@ import sys
 ENGINE = Path(__file__).resolve().parents[1]
 PACKAGE = ENGINE / "packages" / "analytics_actions_flutter"
 MANIFEST = "generated_manifest.json"
+# Written next to the snapshot by the ShipGlows dev tooling (environment note and
+# per-agent configs), never by this tool: left untouched and outside the snapshot.
+TOOLING_FILES = {"ENVIRONMENT.md", ".mcp.json"}
+TOOLING_DIRS = (".codex/", ".gemini/", ".kilo/", ".opencode/")
+
+
+def is_tooling_file(name: str) -> bool:
+    return name in TOOLING_FILES or name.startswith(TOOLING_DIRS)
 
 
 def canonical_snapshot() -> tuple[dict[str, bytes], bytes]:
@@ -49,7 +57,11 @@ def destination(host: Path) -> Path:
 def sync(host: Path, files: dict[str, bytes], manifest: bytes, check: bool) -> None:
     target = destination(host)
     expected = {**files, MANIFEST: manifest}
-    existing = {path.relative_to(target).as_posix(): path for path in target.rglob("*") if path.is_file()}
+    existing = {
+        name: path
+        for path in target.rglob("*")
+        if path.is_file() and not is_tooling_file(name := path.relative_to(target).as_posix())
+    }
     if check:
         drift = set(expected).symmetric_difference(existing)
         drift.update(name for name in set(expected).intersection(existing) if existing[name].read_bytes() != expected[name])

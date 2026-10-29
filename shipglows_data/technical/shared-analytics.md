@@ -4,7 +4,7 @@ metadata_schema_version: "1.0"
 artifact_version: "1.0.0"
 project: analytics-engine
 created: "2026-10-06"
-updated: "2026-10-06"
+updated: "2026-10-29"
 status: active
 source_skill: sg-docs
 scope: shared-analytics-architecture
@@ -37,6 +37,7 @@ provider credentials, database access, content mutation or publication.
 | ContentGlows | Fresh authenticated opportunities, prepare brief, deliberate copy | Backend project ownership and latest snapshot are authoritative |
 | ShipGlows | Explicit JSON import into an opened idle conversation draft | Import is untrusted; project mapping/source identity are not authenticated by JSON |
 | Agent CLI | GET opportunities and POST review-only brief | Existing host bearer token; exact project, period, opportunity and snapshot checks |
+| ContentGlows (audience) | `AudienceReportView` from `GET /api/analytics/report` (`shipglows.audience.v1`) | Read-only anonymous aggregates of the first-party tracker; verified domains only |
 
 The CLI and ContentGlows use the same backend routes. This does not make the
 ShipGlows app a live API consumer: its current journey is manual import. A hosted
