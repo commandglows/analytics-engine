@@ -2,6 +2,17 @@ import 'package:flutter/material.dart';
 import 'audience_contracts.dart';
 import 'opportunities_view.dart' show AnalyticsTranslate;
 
+/// Host action offered on a report that is not ready (open settings, show
+/// setup instructions…), chosen from the report's `reasonCode`.
+class AudienceAction {
+  const AudienceAction({required this.label, required this.onPressed, this.icon});
+  final String label;
+  final VoidCallback onPressed;
+  final IconData? icon;
+}
+
+typedef AudienceActionFor = AudienceAction? Function(String reasonCode);
+
 /// Read-only audience report. Hosts supply semantic spacing and their own
 /// Material theme; every figure is an anonymous aggregate from the backend.
 class AudienceReportView extends StatelessWidget {
@@ -12,30 +23,41 @@ class AudienceReportView extends StatelessWidget {
     required this.inset,
     required this.gap,
     this.maxRows = 10,
+    this.actionFor,
   });
   final AudienceReport report;
   final AnalyticsTranslate translate;
   final double inset, gap;
   final int maxRows;
 
+  /// Optional host action for a report that is not ready.
+  final AudienceActionFor? actionFor;
+
   @override
   Widget build(BuildContext context) {
     final tr = translate;
     final theme = Theme.of(context);
     final overview = report.overview;
-    final stateLabel = switch (report.status) {
-      'empty' =>
-        'No measured visit yet. Add the audience tracker to the site and verify its domain.',
-      'insufficient' =>
-        'Fewer visitors than the anonymity threshold: figures stay hidden.',
-      _ => 'Anonymous aggregates; small groups are hidden and counts are rounded.',
-    };
+    final reasonCode = report.reasonCode;
+    final action = reasonCode == null ? null : actionFor?.call(reasonCode);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(tr('How your content is read'), style: theme.textTheme.titleLarge),
         SizedBox(height: gap),
-        Text(tr(report.reason ?? stateLabel)),
+        if (report.isReady)
+          Text(
+            tr('Anonymous aggregates; small groups are hidden and counts are rounded.'),
+            style: theme.textTheme.bodySmall,
+          )
+        else
+          _NotReadyCard(
+            report: report,
+            action: action,
+            translate: tr,
+            inset: inset,
+            gap: gap,
+          ),
         if (report.traffic case final traffic?)
           _Section(
             title: tr('Site traffic'),
@@ -158,7 +180,7 @@ class AudienceReportView extends StatelessWidget {
               ],
             ),
         ],
-        if (report.limitations.isNotEmpty) ...[
+        if (report.isReady && report.limitations.isNotEmpty) ...[
           SizedBox(height: gap),
           ExpansionTile(
             tilePadding: EdgeInsets.zero,
@@ -192,6 +214,74 @@ String _duration(double seconds) {
   final total = seconds.round();
   if (total < 60) return '$total s';
   return '${total ~/ 60} min ${(total % 60).toString().padLeft(2, '0')} s';
+}
+
+/// Not-ready state: what is missing, why, and the host's next step.
+class _NotReadyCard extends StatelessWidget {
+  const _NotReadyCard({
+    required this.report,
+    required this.action,
+    required this.translate,
+    required this.inset,
+    required this.gap,
+  });
+  final AudienceReport report;
+  final AudienceAction? action;
+  final AnalyticsTranslate translate;
+  final double inset, gap;
+
+  @override
+  Widget build(BuildContext context) {
+    final tr = translate;
+    final theme = Theme.of(context);
+    final (icon, headline) = switch (report.reasonCode) {
+      'no_domain' => (Icons.language_outlined, 'Add your site to this project'),
+      'domain_unverified' => (Icons.verified_outlined, "Verify your site's domain"),
+      'no_tracker' => (Icons.insights_outlined, 'No visit measured yet'),
+      'legacy_tracker_only' => (Icons.update_outlined, 'Switch to the audience tracker'),
+      'below_threshold' => (Icons.groups_outlined, 'Not enough visitors yet'),
+      _ => (Icons.insights_outlined, 'No audience data yet'),
+    };
+    final action = this.action;
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: EdgeInsets.all(inset),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ExcludeSemantics(child: Icon(icon, color: theme.colorScheme.primary)),
+            SizedBox(width: inset),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(tr(headline), style: theme.textTheme.titleMedium),
+                  if (report.reason case final reason?) ...[
+                    SizedBox(height: gap / 2),
+                    Text(
+                      tr(reason),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                  if (action != null) ...[
+                    SizedBox(height: gap),
+                    FilledButton.icon(
+                      onPressed: action.onPressed,
+                      icon: Icon(action.icon ?? Icons.arrow_forward_rounded),
+                      label: Text(action.label),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _Stat extends StatelessWidget {

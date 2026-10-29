@@ -10,6 +10,15 @@ library;
 const audienceSchemaVersion = 'shipglows.audience.v1';
 const _maxRows = 200;
 
+/// Why a report is not `ready`; hosts map each code to their own action.
+const audienceReasonCodes = {
+  'no_domain',
+  'domain_unverified',
+  'no_tracker',
+  'legacy_tracker_only',
+  'below_threshold',
+};
+
 const _invalid = FormatException('Invalid or unsupported audience report');
 
 void _keys(Map<String, dynamic> value, Set<String> allowed) {
@@ -284,6 +293,7 @@ class AudienceReport {
     this.overview,
     this.traffic,
     this.reason,
+    this.reasonCode,
   });
 
   final String projectId, period;
@@ -296,6 +306,9 @@ class AudienceReport {
 
   /// Why the report is `empty` or `insufficient`, when the backend knows.
   final String? reason;
+
+  /// One of [audienceReasonCodes] when the report is not `ready`.
+  final String? reasonCode;
   final AudienceTraffic? traffic;
   final AudienceOverview? overview;
   final List<AudiencePage> pages;
@@ -317,6 +330,7 @@ class AudienceReport {
       'generatedAt',
       'minGroupVisitors',
       'reason',
+      'reasonCode',
       'traffic',
       'overview',
       'pages',
@@ -346,6 +360,11 @@ class AudienceReport {
       generatedAt: generatedAt.toUtc(),
       minGroupVisitors: _count(json['minGroupVisitors']),
       reason: _optionalText(json['reason'], 500),
+      reasonCode: switch (json['reasonCode']) {
+        null => null,
+        final String code when audienceReasonCodes.contains(code) => code,
+        _ => throw _invalid,
+      },
       traffic: json['traffic'] == null
           ? null
           : AudienceTraffic.fromJson(_map(json['traffic'])),
