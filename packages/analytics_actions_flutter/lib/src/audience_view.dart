@@ -35,7 +35,31 @@ class AudienceReportView extends StatelessWidget {
       children: [
         Text(tr('How your content is read'), style: theme.textTheme.titleLarge),
         SizedBox(height: gap),
-        Text(tr(stateLabel)),
+        Text(tr(report.reason ?? stateLabel)),
+        if (report.traffic case final traffic?)
+          _Section(
+            title: tr('Site traffic'),
+            empty: '',
+            gap: gap,
+            children: [
+              Wrap(
+                spacing: gap,
+                runSpacing: gap,
+                children: [
+                  _StatCard(
+                    inset: inset,
+                    child: _Stat(label: tr('Page views'), value: _count(traffic.pageviews)),
+                  ),
+                  _StatCard(
+                    inset: inset,
+                    child: _Stat(label: tr('Pages viewed'), value: '${traffic.uniquePages}'),
+                  ),
+                ],
+              ),
+              for (final page in traffic.topPages.take(maxRows))
+                _Row(title: page.path, subtitle: '${_count(page.views)} ${tr('views')}'),
+            ],
+          ),
         if (report.isReady && overview != null) ...[
           SizedBox(height: gap),
           Wrap(

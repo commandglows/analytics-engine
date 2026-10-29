@@ -231,6 +231,41 @@ class AudienceCampaign {
   }
 }
 
+/// Page views of every tracker on the project's domains (legacy script
+/// included): no visitor dimension, pages under 10 views hidden.
+class AudienceTraffic {
+  const AudienceTraffic({
+    required this.pageviews,
+    required this.uniquePages,
+    required this.topPages,
+  });
+  final int pageviews, uniquePages;
+  final List<AudienceTrafficPage> topPages;
+
+  factory AudienceTraffic.fromJson(Map<String, dynamic> json) {
+    _keys(json, {'pageviews', 'uniquePages', 'topPages'});
+    return AudienceTraffic(
+      pageviews: _count(json['pageviews']),
+      uniquePages: _count(json['uniquePages']),
+      topPages: _rows(json['topPages'], AudienceTrafficPage.fromJson),
+    );
+  }
+}
+
+class AudienceTrafficPage {
+  const AudienceTrafficPage({required this.path, required this.views});
+  final String path;
+  final int views;
+
+  factory AudienceTrafficPage.fromJson(Map<String, dynamic> json) {
+    _keys(json, {'path', 'views'});
+    return AudienceTrafficPage(
+      path: _text(json['path'], 2048),
+      views: _count(json['views']),
+    );
+  }
+}
+
 class AudienceReport {
   const AudienceReport({
     required this.projectId,
@@ -247,6 +282,8 @@ class AudienceReport {
     required this.campaigns,
     required this.limitations,
     this.overview,
+    this.traffic,
+    this.reason,
   });
 
   final String projectId, period;
@@ -256,6 +293,10 @@ class AudienceReport {
   final String status;
   final DateTime generatedAt;
   final int minGroupVisitors;
+
+  /// Why the report is `empty` or `insufficient`, when the backend knows.
+  final String? reason;
+  final AudienceTraffic? traffic;
   final AudienceOverview? overview;
   final List<AudiencePage> pages;
   final List<AudienceGroup> authors, categories;
@@ -275,6 +316,8 @@ class AudienceReport {
       'status',
       'generatedAt',
       'minGroupVisitors',
+      'reason',
+      'traffic',
       'overview',
       'pages',
       'authors',
@@ -302,6 +345,10 @@ class AudienceReport {
       status: status as String,
       generatedAt: generatedAt.toUtc(),
       minGroupVisitors: _count(json['minGroupVisitors']),
+      reason: _optionalText(json['reason'], 500),
+      traffic: json['traffic'] == null
+          ? null
+          : AudienceTraffic.fromJson(_map(json['traffic'])),
       overview: json['overview'] == null
           ? null
           : AudienceOverview.fromJson(_map(json['overview'])),
